@@ -2,6 +2,7 @@ from pathlib import Path
 import sys
 PATH = Path(__file__).parent.resolve()
 import os
+import argparse
 
 class DisplayablePath(object):
     display_filename_prefix_middle = '├──'
@@ -79,6 +80,15 @@ class DisplayablePath(object):
         return ''.join(reversed(parts))
 
 if __name__=="__main__":
-    paths = DisplayablePath.make_tree(Path(os.path.join(PATH, '../print_directory')))
+    parser = argparse.ArgumentParser(description='Print directory')
+    parser.add_argument('-d', '--dir', 
+                        help='directory to print (default: ../print_directory)', 
+                        default="../print_directory")
+    args = parser.parse_args()
+    if args.dir == "../print_directory":
+        paths = DisplayablePath.make_tree(Path(os.path.join(PATH, '../print_directory')))
+    else:
+        paths = DisplayablePath.make_tree(Path(args.dir))
+
     for path in paths:
         print(path.displayable())
