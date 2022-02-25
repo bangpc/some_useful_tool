@@ -21,7 +21,8 @@ class DisplayablePath(object):
 
     @property
     def displayname(self):
-        if self.path.is_dir():
+        if self.path.is_dir() and not "." in self.path.name.split("/")[-1]:
+            print(self.path.name)
             return self.path.name + '/'
         return self.path.name
 
