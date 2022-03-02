@@ -8,3 +8,4 @@
   Step1: docker exec -it gitlab bash
   Step2: cat /etc/gitlab/initial_root_password
 
+
