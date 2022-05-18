@@ -26,4 +26,7 @@
 	   docker exec -it gitlab gitlab-rails runner "Project.where.not(import_url: nil).each { |p| p.import_data.destroy if p.import_data }"
 	   docker container restart gitlab
 
+3. Reset user password
+
+   	Follow this link https://docs.gitlab.com/ee/security/reset_user_password.html
 
