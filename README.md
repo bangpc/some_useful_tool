@@ -13,3 +13,4 @@
    + cd /usr/lib/firmware/rtl_bt
    + sudo ln -s rtl8761b_fw.bin rtl8761bu_fw.bin
    + sudo dmesg (run this command first if error then run the command above)
+   + auto connect: https://github.com/jrouleau/bluetooth-autoconnect
