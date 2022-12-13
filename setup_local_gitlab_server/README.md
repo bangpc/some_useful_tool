@@ -23,6 +23,7 @@
    Step 3: In new gitlab server
    
 	   Copy 'db_key_base' in '/srv/gitlab/config/gitlab-secrets.json' of old gitlab server to new gitlab server
+	   sudo docker exec -it gitlab gitlab-backup restore BACKUP=file-name
 	   docker exec -it gitlab gitlab-rails runner "Project.where.not(import_url: nil).each { |p| p.import_data.destroy if p.import_data }"
 	   docker container restart gitlab
 
