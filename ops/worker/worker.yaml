@@ -1,0 +1,157 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+  namespace: vss
+  labels:
+    app: worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: worker
+  template:
+    metadata:
+      labels:
+        app: worker
+    spec:
+      volumes:
+      - name: worker
+        hostPath:
+          path: /media/Data/bangpc/nfs_storage/bangpc/vss/vss-worker
+      - name: shm
+        emptyDir:
+          medium: Memory
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
+      containers:
+        - name: worker
+          # ports:
+          # - containerPort: 8000
+          #   name: http
+          image: "vss-worker:v0.0.1"
+          env:
+            - name: DQ_BROKER_DB
+              value: "0"
+            - name: DQ_RESULT_DB
+              value: "1"
+            - name: DQ_FACE_ACTOR
+              value: "RecognitionFace"
+            - name: DQ_FACE_QUEUE
+              value: "face"
+            - name: DQ_HEATMAP_QUEUE
+              value: "heatmap"
+            - name: DQ_HI_QUEUE
+              value: "hi"
+            - name: MONGODB_ADDRESS
+              value: "172.19.20.183:30003"
+            - name: MONGODB_HOST
+              value: "172.19.20.183"
+            - name: MONGODB_PORT
+              value: "30003"
+            - name: MONGODB_USER
+              value: "root"
+            - name: MONGODB_PASS
+              value: "123456a@"
+            - name: MONGODB_DBNAME
+              value: "vss-0-1-0"
+            - name: MONGODB_HEATMAP_COL
+              value: "heatmap" 
+            - name: MONGODB_HI_COL
+              value: "hi"
+            - name: REDIS_HOST
+              value: "172.19.20.183"
+            - name: REDIS_PORT
+              value: "30000"
+            - name: REDIS_PASS
+              value: "123456a@"
+            - name: S3_ENDPOINT_URL
+              value: "http://minio:9000" #"http://172.19.20.183:30001"
+            - name: S3_ACCESS_KEY_ID
+              value: "admin"
+            - name: S3_SECRET_ACCESS_KEY
+              value: "123456a@"
+            - name: S3_REGION_NAME
+              value: "ap-southeast-1"
+            - name: S3_BUCKET
+              value: "event"
+            - name: SINGLESTORE_HOST
+              value: "192.168.0.119"
+            - name: SINGLESTORE_PORT
+              value: "4406"
+            - name: SINGLESTORE_USER
+              value: "root"
+            - name: SINGLESTORE_PASS
+              value: "123456aA@"
+            - name: SINGLESTORE_DBNAME
+              value: "aiservice_dev"
+            - name: TRITON_GRPC_URL
+              value: "triton-custom:8001"
+            - name: FD_MODEL_NAME
+              value: "ensemble_scrfd_face_pos"
+            - name: FD_IMG_W
+              value: "1024"
+            - name: FD_IMG_H
+              value: "640"
+            - name: FR_MODEL_NAME
+              value: "fr_vit_batch"
+            - name: FR_IMG_W
+              value: "112"
+            - name: FR_IMG_H
+              value: "112"
+            - name: FISHEYE_MODEL_NAME
+              value: "fisheye"
+            - name: HOST_EVENT
+              value: "http://search"
+            - name: PORT_EVENT
+              value: "6000"
+            - name: ENDPOINT_EVENT
+              value: "search"
+            - name: HOST_SI
+              value: "http://172.19.20.171"
+            - name: PORT_SI
+              value: "6000"
+            - name: ENDPOINT_SI
+              value: "event"
+            - name: HOST_HI
+              value: "http://172.19.20.171"
+            - name: PORT_HI
+              value: "6000"
+            - name: ENDPOINT_HI
+              value: "event"
+          volumeMounts:
+          - mountPath: /workspace/worker
+            name: worker
+          - mountPath: /dev/shm
+            name: shm
+          - mountPath: /etc/timezone
+            name: timezone
+          - mountPath: /etc/localtime
+            name: localtime
+          command: ["/bin/sh", "-c"]
+          args: ["cd /workspace/worker && ./run_worker.sh"]
+
+            # ---
+            # 
+            # apiVersion: v1
+            # kind: Service
+            # metadata:
+            #   name: worker
+            #   namespace: vss-0-1-0
+            #   labels:
+            #     app: worker
+            # spec:
+            #   selector:
+            #     app: worker
+            #       # ports:
+            #       #   - protocol: TCP
+            #       #     port: 8000
+            #       #     name: http
+            #       #     targetPort: 8000
+            #       #     nodePort: 31112
+            #   type: LoadBalancer
+            #   loadBalancerIP: 192.168.0.103

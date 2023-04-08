@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: controller
+  namespace: vss
+  labels:
+    app: controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: controller
+  template:
+    metadata:
+      labels:
+        app: controller
+    spec:
+      volumes:
+      - name: storage
+        hostPath:
+          path: /media/Data/bangpc/nfs_storage/bangpc/vss/vss-controller 
+      containers:
+        - name: controller
+          ports:
+          - containerPort: 8000
+            name: http
+          image: "controller-test-api:23-01" #"vss-controller:23.03" 
+          env:
+            - name: CONTROLLER_PORT
+              value: "8000"
+            - name: DB_NAME
+              value: "vss-0-1-0"
+            - name: S3_ENDPOINT_URL
+              value: "http://minio:9000"
+            - name: S3_ACCESS_KEY_ID
+              value: "admin"
+            - name: S3_SECRET_ACCESS_KEY
+              value: "123456a@"
+            - name: PARQUET_DB_PATH
+              value: "s3://vss/PARQUET_DATABASE" 
+          volumeMounts:
+          - mountPath: /vss-controller
+            name: storage
+          command: ["/bin/sh", "-c"]
+            #args: ["while :; do echo 'Hit CTRL+C'; sleep 1; done"]
+          args: ["cd /vss-controller  && python3 vss_controller/main.py"]
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: controller
+  namespace: vss
+  labels:
+    app: controller
+spec:
+  selector:
+    app: controller
+  ports:
+    - protocol: TCP
+      port: 8000
+      name: http
+      targetPort: 8000
+      nodePort: 31111
+  type: NodePort
+  # loadBalancerIP: 192.168.0.101

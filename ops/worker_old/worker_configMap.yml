@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: worker-configmap
+  namespace: vss
+
+data:
+  # propertylike keys; each key maps to a simple value
+  broker_db: "0"
+  broker_result: "1"  
+  face_actor: "RecognitionFace"
+  queue_name: "faces"
+
+  mongodb_address: "mongodb:27017" #service_name.namespace.svc.cluster.local:port 
+  mongodb_host: "mongodb"
+  mongodb_port: "27017"
+  mongodb_dbname: "vss-0-1-0"
+  mongodb_heatmap_col: "heatmap"
+  mongodb_hi_col: "hi"
+
+  redis_host: "172.19.20.183"
+  redis_port: "31593"
+
+  s3_endpoint_url: "http://172.19.20.183:31963" #http://service_name.namespace.svc.cluster.local:port 
+  s3_region_name: "apsoutheast1"
+  s3_bucket: "event"
+
+  singlestore_host: "192.168.0.119"
+  singlestore_port: "4406"
+  singlestore_dbname: "aiservice_dev"
+
+  triton_grpc_url: "triton-custom:8001" #service_name.namespace.svc.cluster.local:port 
+  fd_model_name: "ensemble_scrfd_face_pos"
+  fd_img_w: "1024"
+  fd_img_h: "640"
+  fr_model_name: "fr_vit_batch"
+  fr_img_w: "112"
+  fr_img_h: "112"
+  fisheye_model_name: "fisheye"
+
+  #config for search event
+  host_event: "http://search"
+  port_event: "6000"
+  endpoint_event: "search"
+
+  #config for si
+  host_si: "http://192.168.0.171"
+  port_si: "6000"
+  endpoint_si: "event"
+
+  #config for hi
+  host_hi: "http://192.168.0.171"
+  port_hi: "6000"
+  endpoint_hi: "event"
+
+  # filelike keys
+  game.properties: |
+    enemy.types=aliens,monsters
+    player.maximumlives=5    
+  userinterface.properties: |
+    color.good=purple
+    color.bad=yellow
+    allow.textmode=true  

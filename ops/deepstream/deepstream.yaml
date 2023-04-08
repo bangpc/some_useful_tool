@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: deepstream
+  namespace: vss
+spec:
+  serviceName: deepstream # the name of service
+  selector:
+    matchLabels:
+      app: deepstream
+  replicas: 3
+  template: # pod template
+    metadata:
+      labels:
+        app: deepstream
+    spec:
+      containers:
+      - name: deepstream
+        image: thienpn/deepstream:6.1-triton-new-1.6.1-deployment #tienluongngoc/deepstream:6.1-triton-new-1.5.2-10g-deployment
+        command: [ "sh", "-c"]
+        args: ["python /home/VSS/scripts/save_env.py && /home/VSS/scripts/auto_start.sh"]
+        env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: POD_SERVICE_NAME
+            value: deepstream
+          - name: SERVICE_PORT
+            value: "9089"
+          - name: DB_HOST
+            value: "mongodb"
+          - name: DB_PORT
+            value: "27017"
+          - name: DB_USER_NAME
+            value: "root"
+          - name: DB_PASSWORD
+            value: "123456a@"
+          - name: DB_DATABASE_NAME
+            value: "vss-0-1-0"
+          - name: TASK_QUEUE
+            value: "dramatiq" #"celery"
+          - name: SHOW_MESSAGE
+            value: "true"
+        ports:
+          - name: http
+            containerPort: 9089
+      restartPolicy: Always
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: deepstream
+  namespace: vss
+spec:
+  clusterIP: None
+  selector:
+    app: deepstream
+  ports:
+    - name: http
+      port: 9089

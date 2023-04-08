@@ -1,0 +1,289 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+  namespace: vss
+  labels:
+    app: worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: worker
+  template:
+    metadata:
+      labels:
+        app: worker
+    spec:
+      # nodeSelector:
+      #   node-task: "worker"
+      volumes:
+      - name: worker
+        hostPath:
+          path: /media/Data/bangpc/nfs_storage/bangpc/vss/processor 
+      - name: logs
+        hostPath:
+          path: /media/Data/bangpc/nfs_storage/bangpc/vss/processor/logs
+      - name: shm
+        emptyDir:
+          medium: Memory
+      - name: timezone
+        hostPath:
+          path: /etc/timezone
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
+      containers:
+        - name: worker
+          ports:
+          - containerPort: 8000
+            name: http
+          image: "worker:1.0.1"
+          env:
+            - name: IS_TEST
+              value: "0"
+            - name: IS_FACE_RECOGNIZE
+              value: "1"
+            - name: IS_HEATMAP
+              value: "0"
+            - name: IS_HI
+              value: "0"
+
+            - name: DQ_BROKER_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: broker_db
+            - name: DQ_RESULT_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: broker_result
+            - name: DQ_FACE_ACTOR
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: face_actor
+            - name: DQ_FACE_QUEUE
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: queue_name
+            - name: CELERY_BROKER_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: broker_db
+            - name: CELERY_RESULT_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: broker_result
+            - name: MONGODB_ADDRESS
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: mongodb_address
+            - name: MONGODB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: mongodb_host
+            - name: MONGODB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: mongodb_port
+            - name: MONGODB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: worker-secret
+                  key: mongo_username
+            - name: MONGODB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: worker-secret
+                  key: mongo_password
+            - name: MONGODB_DBNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: mongodb_dbname
+            - name: MONGODB_HEATMAP_COL
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: mongodb_heatmap_col
+            - name: MONGODB_HI_COL
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: mongodb_hi_col
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: redis_host
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: redis_port
+            - name: REDIS_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: worker-secret
+                  key: redis_password
+            - name: S3_ENDPOINT_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: s3_endpoint_url
+            - name: S3_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: worker-secret
+                  key: s3_access_key_id
+            - name: S3_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: worker-secret
+                  key: s3_secret_access_key
+            - name: S3_REGION_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: s3_region_name
+            - name: S3_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: s3_bucket
+            - name: TRITON_GRPC_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: triton_grpc_url
+            - name: FD_MODEL_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: fd_model_name
+            - name: FD_IMG_W
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: fd_img_w
+            - name: FD_IMG_H
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: fd_img_h
+            - name: FR_MODEL_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: fr_model_name
+            - name: FR_IMG_W
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: fr_img_w
+            - name: FR_IMG_H
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: fr_img_h
+            - name: FISHEYE_MODEL_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: fisheye_model_name
+
+            #config for Search event
+            - name: HOST_EVENT
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: host_event
+            - name: PORT_EVENT
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: port_event
+            - name: ENDPOINT_EVENT
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: endpoint_event
+
+            #Config for SI
+            - name: HOST_SI
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: host_si
+            - name: PORT_SI
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: port_si
+            - name: ENDPOINT_SI
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: endpoint_si
+            #Config for HI
+            - name: HOST_HI
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: host_hi
+            - name: PORT_HI
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: port_hi
+            - name: ENDPOINT_HI
+              valueFrom:
+                configMapKeyRef:
+                  name: worker-configmap 
+                  key: endpoint_hi
+
+          volumeMounts:
+          - mountPath: /workspace/worker
+            name: worker
+          - mountPath: /workspace/worker/logs
+            name: logs
+          - mountPath: /dev/shm
+            name: shm
+          - mountPath: /etc/timezone
+            name: timezone
+          - mountPath: /etc/localtime
+            name: localtime
+          # command: ["/bin/sh", "-c", "echo Hello Team, This is Sample File for HostVolume - $(date) >> /workspace/worker/logs/output.txt"]
+          command: ["/bin/sh", "-c"]
+          args: ["cd /workspace/worker && ./run_worker.sh"]
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: worker
+  namespace: vss
+  labels:
+    app: worker
+spec:
+  selector:
+    app: worker
+  ports:
+    - protocol: TCP
+      port: 8000
+      name: http
+      targetPort: 8000
+      nodePort: 31112
+      
+  type: NodePort
+  externalIPs: ["172.31.71.218"]
+  # loadBalancerIP: 192.168.0.103

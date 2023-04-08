@@ -1,0 +1,103 @@
+---
+apiVersion: redis.redis.opstreelabs.in/v1beta1
+kind: RedisCluster
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/component: middleware
+{{- if .Values.labels }}
+{{- range $labelkey, $labelvalue := .Values.labels }}
+    {{ $labelkey}}: {{ $labelvalue }}
+{{- end }}
+{{- end }}
+spec:
+  clusterSize: {{ .Values.redisCluster.clusterSize }}
+  persistenceEnabled: {{ .Values.redisCluster.persistenceEnabled }}
+  clusterVersion: {{ .Values.redisCluster.clusterVersion }}
+  redisLeader:
+{{- if .Values.redisCluster.leader.affinity }}
+    affinity:
+{{ toYaml .Values.redisCluster.leader.affinity | nindent 6 }}
+{{- end }}
+    replicas: {{ .Values.redisCluster.leader.replicas }}
+{{- if eq .Values.externalConfig.enabled true }}
+    redisConfig:
+      additionalRedisConfig: {{ .Release.Name }}-ext-config
+{{- end }}
+{{- if eq .Values.pdb.enabled true }}
+    pdb:
+      enabled: {{ .Values.pdb.enabled }}
+      {{- if .Values.pdb.maxUnavailable }}
+      maxUnavailable: {{ .Values.pdb.maxUnavailable }}
+      {{- end  }}
+      {{- if .Values.pdb.minAvailable }}
+      minAvailable: {{ .Values.pdb.minAvailable }}
+      {{- end  }}
+{{- end }}
+  redisFollower:
+{{- if .Values.redisCluster.follower.affinity }}
+    affinity:
+{{ toYaml .Values.redisCluster.follower.affinity | nindent 6 }}
+{{- end }}
+    replicas: {{ .Values.redisCluster.follower.replicas }}
+{{- if eq .Values.externalConfig.enabled true }}
+    redisConfig:
+      additionalRedisConfig: {{ .Release.Name }}-ext-config
+{{- end }}
+{{- if eq .Values.pdb.enabled true }}
+    pdb:
+      enabled: {{ .Values.pdb.enabled }}
+      {{- if .Values.pdb.maxUnavailable }}
+      maxUnavailable: {{ .Values.pdb.maxUnavailable }}
+      {{- end  }}
+      {{- if .Values.pdb.minAvailable }}
+      minAvailable: {{ .Values.pdb.minAvailable }}
+      {{- end  }}
+{{- end }}
+  redisExporter:
+    enabled: {{ .Values.redisExporter.enabled }}
+    image: "{{ .Values.redisExporter.image }}:{{ .Values.redisExporter.tag }}"
+    imagePullPolicy: "{{ .Values.redisExporter.imagePullPolicy }}"
+    resources:
+{{ toYaml .Values.redisExporter.resources | indent 6 }}
+  kubernetesConfig:
+    image: "{{ .Values.redisCluster.image }}:{{ .Values.redisCluster.tag }}"
+    imagePullPolicy: "{{ .Values.redisCluster.imagePullPolicy }}"
+    resources:
+{{ toYaml .Values.redisCluster.resources | indent 6 }}
+{{- if .Values.redisCluster.redisSecret }}
+    redisSecret:
+      name: "{{ .Values.redisCluster.redisSecret.secretName }}"
+      key: "{{ .Values.redisCluster.redisSecret.secretKey }}"
+{{- end }}
+{{- if .Values.storageSpec }}
+  storage:
+{{ toYaml .Values.storageSpec | indent 4 }}
+{{- end }}
+{{- if .Values.priorityClassName }}
+  priorityClassName: "{{ .Values.priorityClassName }}"
+{{- end }}
+{{- if .Values.nodeSelector }}
+  nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 4 }}
+{{- end }}
+{{- if .Values.securityContext }}
+  securityContext:
+{{ toYaml .Values.securityContext | indent 4 }}
+{{- end }}
+{{- if .Values.tolerations }}
+  tolerations:
+{{ toYaml .Values.tolerations | indent 4 }}
+{{- end }}
+{{- if .Values.sidecars }}
+  sidecars:
+{{ toYaml .Values.sidecars | indent 4 }}
+{{- end }}
+{{- if .Values.serviceAccountName }}
+  serviceAccountName: "{{ .Values.serviceAccountName }}"
+{{- end }}

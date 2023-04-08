@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: serving-service
+  namespace: vss
+  labels:
+    app: serving-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: serving-service
+  template:
+    metadata:
+      labels:
+        app: serving-service
+    spec:
+      volumes:
+      - name: storage
+        hostPath:
+          path: "/media/Data/bangpc/nfs_storage/bangpc/vss/vss-serving-service"
+      containers:
+        - name: serving-service
+          ports:
+          - containerPort: 8000
+            name: http
+          image: "serving_service_update:latest"  
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+          - mountPath: /vss-serving-service
+            name: storage
+          command: ["/bin/sh", "-c"]
+          args: ["cd /vss-serving-service/controller  && python3 controller.py"]
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: serving-service
+  namespace: vss
+  labels:
+    app: serving-service
+spec:
+  selector:
+    app: serving-service
+  ports:
+    - protocol: TCP
+      port: 9000
+      name: http
+      targetPort: 9000
+      nodePort: 30004
+  type: NodePort

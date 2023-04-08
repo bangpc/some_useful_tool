@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: search
+  namespace: vss
+  labels:
+    app: search
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: search
+  template:
+    metadata:
+      labels:
+        app: search
+    spec:
+      volumes:
+      - name: search
+        hostPath:
+          path: /media/Data/bangpc/nfs_storage/bangpc/vss/vss-search
+      containers:
+        - name: search
+          ports:
+          - containerPort: 6000
+            name: http
+          image: "thienpn/vss-search:22.12-search-0.1"
+          env:
+            - name: DB_HOST
+              value: "mongodb:27017"
+            - name: DB_NAME
+              value: "vss-0-1-0"
+            - name: S3_ENDPOINT_URL
+              value: "minio:9000"
+            - name: S3_ACCESS_KEY_ID
+              value: "admin"
+            - name: S3_SECRET_ACCESS_KEY
+              value: "123456a@"
+            - name: PARQUET_DB_PATH
+              value: "s3://vss/PARQUET_DATABASE"
+            - name: SEARCH_PORT
+              value: "6000"
+          volumeMounts:
+          - mountPath: /vss-search
+            name: search
+          command: ["/bin/sh", "-c"]
+          args: ["python3 vss_search/app/main.py"]
+            #args: ["while :; do echo 'Hit CTRL+C'; sleep 1; done"]
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: search
+  namespace: vss
+  labels:
+    app: search
+spec:
+  selector:
+    app: search
+  ports:
+    - protocol: TCP
+      port: 6000
+      name: http
+      targetPort: 6000
+      nodePort: 32003
+  type: NodePort
+  # loadBalancerIP: 192.168.0.101

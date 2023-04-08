@@ -1,0 +1,7 @@
+FROM nvcr.io/nvidia/tritonserver:22.08-py3
+RUN pip install opencv-python
+RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
+RUN pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu116
+RUN pip install tritonclient[all] loguru cupy-cuda11x
+RUN pip install pycocotools
+RUN pip install shapely

@@ -1,0 +1,24 @@
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: triton-custom-hpa
+  namespace: monitoring
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1beta1
+    kind: Deployment
+    name: triton-custom
+  minReplicas: 1
+  maxReplicas: 7
+  metrics:
+  - type: Object
+    object:
+      metric:
+        name: "avg_time_queue_us"
+      describedObject:
+        apiVersion: "/v1beta1"
+        kind: "Namespace"
+        name: "monitoring"
+      target:
+        type: "Value"
+        value: 10 
